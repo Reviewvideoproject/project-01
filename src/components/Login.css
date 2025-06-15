@@ -203,4 +203,14 @@
   padding: 4px 8px;
   border-radius: 4px;
   background-color: #f7f7f7;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  border: 1px solid #fcc;
 } 
