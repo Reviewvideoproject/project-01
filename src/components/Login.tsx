@@ -2,11 +2,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import './Login.css';
 
-const Login = () => {
+interface LoginProps {
+  onSwitchToSignUp: () => void;
+}
+
+const Login = ({ onSwitchToSignUp }: LoginProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<string>('Testing connection...');
 
   // Test Supabase connection
@@ -36,6 +41,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setMessage(null);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -48,6 +54,34 @@ const Login = () => {
       // Successful login
       console.log('Logged in:', data);
       // You can redirect or update UI state here
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) throw error;
+      
+      setMessage('Check your email for the magic link!');
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -83,12 +117,17 @@ const Login = () => {
         <div className="login-header">
           <h1>Welcome back</h1>
           <p className="subtitle">Sign in to continue</p>
-          <p className="connection-status">{connectionStatus}</p>
         </div>
         
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="success-message">
+            {message}
           </div>
         )}
 
@@ -132,6 +171,15 @@ const Login = () => {
           >
             {loading ? 'Signing in...' : 'Continue with Email'}
           </button>
+
+          <button 
+            type="button" 
+            className="magic-link-button"
+            onClick={handleMagicLink}
+            disabled={loading}
+          >
+            {loading ? 'Sending...' : 'Send Magic Link'}
+          </button>
         </form>
 
         <div className="divider">
@@ -156,7 +204,7 @@ const Login = () => {
         </div>
 
         <p className="signup-link">
-          Don't have an account? <a href="#">Sign up</a>
+          Don't have an account? <a href="#" onClick={onSwitchToSignUp}>Sign up</a>
         </p>
       </div>
     </div>

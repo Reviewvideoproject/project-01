@@ -18,6 +18,15 @@ body {
   width: 100%;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 18px;
+  color: #37352f;
+}
+
 #root {
   width: 100%;
   min-height: 100vh;
